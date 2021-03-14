@@ -88,26 +88,20 @@ public:
 	 * flag = false: according to PWM or full-on
 	 */
 	void fullOff(unsigned int pin, bool flag);
+	/*
+	 * Sets the output mode. If <invert> is true then the output logic state is
+	 * inverted. If <openDrain> is true then the outputs are configured with a
+	 * open drain structure (totem pole otherwise).
+	 */
+	void setOutputMode(bool invert, bool openDrain);
 private:
 	void setup();
 public:
 	static constexpr unsigned int PWM_MAX = 4096;
 	static constexpr unsigned int ALL_LED = 16;
-
 	//Frequency range: [40-1000 Hz]
 	static constexpr unsigned int MIN_FREQUENCY = 40;
 	static constexpr unsigned int MAX_FREQUENCY = 1000;
-private:
-	static constexpr double OSCILLATOR_FREQUENCY = 25000000;
-	static constexpr unsigned char PRESCALE_MIN = 0x03;
-
-	static constexpr unsigned char MODE1_REG = 0x0;
-	static constexpr unsigned char PRESCALE_REG = 0xFE;
-
-	static constexpr unsigned char RESTART_MASK = 0x80;
-	static constexpr unsigned char SLEEP_MASK = 0x10;
-	static constexpr unsigned char AI_MASK = 0x20;
-	static constexpr unsigned char FULL_MASK = 0x10;
 };
 
 } /* namespace wanhive */

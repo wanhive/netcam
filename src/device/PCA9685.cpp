@@ -28,6 +28,23 @@
 #define PIN_COUNT 16      //Total number of pins
 
 namespace {
+
+constexpr double OSCILLATOR_FREQUENCY = 25000000;
+constexpr unsigned char PRESCALE_MIN = 0x03;
+
+constexpr unsigned char MODE1_REG = 0x0;
+constexpr unsigned char MODE2_REG = 0x01;
+constexpr unsigned char PRESCALE_REG = 0xFE;
+
+constexpr unsigned char RESTART_MASK = 0x80;
+constexpr unsigned char SLEEP_MASK = 0x10;
+constexpr unsigned char AI_MASK = 0x20;
+
+constexpr unsigned char INVRT_MASK = 0x10;
+constexpr unsigned char TOTEMPOLE_MASK = 0x04;
+
+constexpr unsigned char FULL_MASK = 0x10;
+
 /**
  * Locates the correct LEDX_ON_L register for the pin number starting at 0.
  */
@@ -178,6 +195,25 @@ void PCA9685::fullOff(unsigned int pin, bool flag) {
 	I2C::read(reg, state);
 	state = Twiddler::mask(state, FULL_MASK, flag);
 	I2C::write(reg, state);
+}
+
+void PCA9685::setOutputMode(bool invert, bool openDrain) {
+	unsigned char state;
+	I2C::read(MODE2_REG, state);
+
+	if (invert) {
+		state |= INVRT_MASK;
+	} else {
+		state &= ~INVRT_MASK;
+	}
+
+	if (openDrain) {
+		state &= ~TOTEMPOLE_MASK;
+	} else {
+		state |= TOTEMPOLE_MASK;
+	}
+
+	I2C::write(MODE2_REG, state);
 }
 
 void PCA9685::setup() {
