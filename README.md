@@ -63,4 +63,5 @@ timerInterval = 5000
 
 ## Resources
 
+- [CHANGELOG](ChangeLog.md)
 - [LICENSE](LICENSE)
