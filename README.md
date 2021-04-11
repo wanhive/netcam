@@ -39,7 +39,7 @@ For Streamer (10 frames per second):
 timerExpiration = 100
 timerInterval = 100
 
-[CAMERA]
+[NETCAM]
 cameraName = /dev/videoXXX
 jpegQuality = 70
 gps = ON
