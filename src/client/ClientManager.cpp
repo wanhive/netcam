@@ -47,9 +47,9 @@
 #define WH_PRODUCT_NAME "Wanhive Netcam"
 
 //VERSION PATTERN: https://semver.org/spec/v2.0.0.html
-#define WH_RELEASE_VERSION "0.1.0"
+#define WH_RELEASE_VERSION "0.2.0"
 #define WH_RELEASE_NAME ""
-#define WH_RELEASE_YEAR "2020"
+#define WH_RELEASE_YEAR "2021"
 #define WH_RELEASE_AUTHOR "Wanhive Systems Private Limited"
 #define WH_RELEASE_EMAIL "info@wanhive.com"
 #define WH_RELEASE_WEBSITE "www.wanhive.com"
