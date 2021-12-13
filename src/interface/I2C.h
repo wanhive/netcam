@@ -69,7 +69,8 @@ public:
 	 */
 	void quickWrite(unsigned char value);
 	/**
-	 * Process calls
+	 * Process calls: send data to a slave and wait for the slave to
+	 * return a value
 	 */
 	//Returns number of read bytes
 	unsigned int process(unsigned char command, unsigned int count,
