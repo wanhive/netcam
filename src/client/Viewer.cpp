@@ -334,9 +334,9 @@ void Viewer::resetSink() {
 				throw Exception(EX_INVALIDPARAM);
 			}
 
-			char t[24];
+			char t[32];
 			memset(t, 0, sizeof(t));
-			if (!Timer::refractorTime(t, sizeof(t), "%Y_%m_%d-%H_%M_%S")) {
+			if (!Timer::print(t, sizeof(t))) {
 				throw Exception(EX_INVALIDOPERATION);
 			}
 
