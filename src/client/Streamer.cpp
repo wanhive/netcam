@@ -118,7 +118,7 @@ void Streamer::sendImage() noexcept {
 	//Number of messages needed
 	unsigned int count = (bytes + Message::PAYLOAD_SIZE - 1)
 			/ Message::PAYLOAD_SIZE;
-	if (!count || (count + 1) > Message::unallocated()) { //+1 for metadata
+	if (!count || !Message::available(count + 1)) { //+1 for metadata
 		return;
 	}
 	//-----------------------------------------------------------------
