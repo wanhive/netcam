@@ -221,14 +221,13 @@ void ClientManager::executeHub() noexcept {
 			return;
 #endif
 		} else if (mode == 2) {
-			unsigned long long host;
+			unsigned long long streamerId;
 			std::cout << "Enter streamer's identifier: ";
-			std::cin >> host;
+			std::cin >> streamerId;
 			if (CommandLine::inputError()) {
 				return;
 			}
-			hub = new Viewer(hubId, configPath);
-			((Viewer*) hub)->setPeer(host);
+			hub = new Viewer(hubId, streamerId, configPath);
 		} else {
 			std::cerr << "Invalid option" << std::endl;
 			return;

@@ -27,6 +27,7 @@ Streamer::Streamer(unsigned long long uid, const char *path) noexcept :
 		ClientHub(uid, path) {
 	memset(&devices, 0, sizeof(devices));
 	clear();
+	flow.setSource(uid);
 }
 
 Streamer::~Streamer() {
@@ -122,7 +123,7 @@ void Streamer::sendImage() noexcept {
 		return;
 	}
 	//-----------------------------------------------------------------
-	auto sequenceNo = nextSequenceNumber();
+	auto sequenceNo = flow.nextSequenceNumber();
 	//-----------------------------------------------------------------
 	/**
 	 * JPEG frames sent on session 1

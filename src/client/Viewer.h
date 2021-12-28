@@ -28,11 +28,9 @@ namespace wanhive {
 
 class Viewer: public ClientHub {
 public:
-	Viewer(unsigned long long uid, const char *path = nullptr) noexcept;
+	Viewer(unsigned long long uid, unsigned long long streamerId,
+			const char *path = nullptr) noexcept;
 	virtual ~Viewer();
-	//This peer will be used as the source of the video stream
-	void setPeer(unsigned long long id) noexcept;
-	unsigned long long getPeer() noexcept;
 private:
 	void configure(void *arg) override final;
 	void cleanup() noexcept override final;
@@ -45,7 +43,7 @@ private:
 	void sendHeartbeat(unsigned long long id, unsigned int frames) noexcept;
 	//Reset the source identifier of the image
 	bool resetSource(unsigned long long id, unsigned int frameRate,
-			unsigned int session) noexcept;
+			unsigned int sequence) noexcept;
 	//Start a new jpeg frame
 	void resetFrame(unsigned int size, unsigned int width, unsigned int height,
 			unsigned int sequenceNumber) noexcept;
@@ -62,13 +60,14 @@ private:
 	void processKeyPress(int keyCode);
 	//Hide the window
 	void hideWindow() noexcept;
+	void clear() noexcept;
 public:
 	static constexpr unsigned long MAX_IMAGE_SIZE = 65536 * 4;
 private:
 	struct {
-		unsigned long long id; //Desired source identifier
-		unsigned int session; //Desired session identifier
-	} source;
+		unsigned long long id; //Desired peer identifier
+		unsigned int sequence; //Desired sequence identifier
+	} peer;
 
 	struct {
 		//Currently designated source of this image
@@ -94,7 +93,7 @@ private:
 	struct {
 		int pan;
 		int tilt;
-	} control;
+	} gimbal;
 
 	struct {
 		const char *fourcc { nullptr };
@@ -111,6 +110,8 @@ private:
 		double longitude;
 		bool show;
 	} location;
+
+	FlowControl flow; //Flow control
 };
 
 } /* namespace wanhive */

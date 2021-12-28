@@ -78,24 +78,16 @@ char* unixToIso8601(double fixtime, char isotime[], size_t len) {
 
 namespace wanhive {
 
-Viewer::Viewer(unsigned long long uid, const char *path) noexcept :
+Viewer::Viewer(unsigned long long uid, unsigned long long streamerId,
+		const char *path) noexcept :
 		ClientHub(uid, path) {
-	memset(&source, 0, sizeof(source));
-	memset(&image, 0, sizeof(image));
-	memset(&control, 0, sizeof(control));
-	memset(&location, 0, sizeof(location));
+	clear();
+	peer.id = streamerId;
+	flow.setSource(uid);
 }
 
 Viewer::~Viewer() {
 
-}
-
-void Viewer::setPeer(unsigned long long id) noexcept {
-	Atomic<unsigned long long>::store(&source.id, id);
-}
-
-unsigned long long Viewer::getPeer() noexcept {
-	return Atomic<unsigned long long>::load(&source.id);
 }
 
 void Viewer::configure(void *arg) {
@@ -112,8 +104,7 @@ void Viewer::configure(void *arg) {
 }
 
 void Viewer::cleanup() noexcept {
-	memset(&source, 0, sizeof(source));
-	memset(&image, 0, sizeof(image));
+	clear();
 	ClientHub::cleanup();
 }
 
@@ -183,16 +174,15 @@ void Viewer::processClockNotification(unsigned long long uid,
 		image.frames = 0; //Reset for the next cycle
 	}
 
-	unsigned long long id = getPeer();
 	unsigned int frames = (((double) image.frameRate) * interval) / 825;
-	sendHeartbeat(id, frames);
+	sendHeartbeat(peer.id, frames);
 }
 
 void Viewer::sendHeartbeat(unsigned long long id, unsigned int frames) noexcept {
 	Message *message = Message::create();
 	if (message) {
-		source.session = nextSequenceNumber();
-		message->putHeader(0, id, Message::HEADER_SIZE, source.session, 0, 0, 0,
+		peer.sequence = flow.nextSequenceNumber();
+		message->putHeader(0, id, Message::HEADER_SIZE, peer.sequence, 0, 0, 0,
 				WH_AQLF_REQUEST);
 		message->appendData32(frames); //Request new frames
 		message->setDestination(0); //Route via overlay network
@@ -201,8 +191,8 @@ void Viewer::sendHeartbeat(unsigned long long id, unsigned int frames) noexcept 
 }
 
 bool Viewer::resetSource(unsigned long long id, unsigned int frameRate,
-		unsigned int session) noexcept {
-	if (!(id == getPeer() && source.session == session)) {
+		unsigned int sequence) noexcept {
+	if (!(id == peer.id && peer.sequence == sequence)) {
 		return false;
 	} else if (!(image.source == id && image.frameRate == frameRate)) {
 		//Source or frame rate changed
@@ -210,7 +200,7 @@ bool Viewer::resetSource(unsigned long long id, unsigned int frameRate,
 		image.source = id;
 		image.frameRate = frameRate;
 
-		memset(&control, 0, sizeof(control));
+		memset(&gimbal, 0, sizeof(gimbal));
 		sink.reset = true;
 		return true;
 	} else {
@@ -368,33 +358,33 @@ void Viewer::processKeyPress(int keyCode) {
 	switch (keyCode) {
 	case 'w': //UP
 	case 'W':
-		control.tilt += 5;
-		if (control.tilt > 60) {
-			control.tilt = 60;
+		gimbal.tilt += 5;
+		if (gimbal.tilt > 60) {
+			gimbal.tilt = 60;
 			return;
 		}
 		break;
 	case 's': //DOWN
 	case 'S':
-		control.tilt -= 5;
-		if (control.tilt < -60) {
-			control.tilt = -60;
+		gimbal.tilt -= 5;
+		if (gimbal.tilt < -60) {
+			gimbal.tilt = -60;
 			return;
 		}
 		break;
 	case 'd': //RIGHT
 	case 'D':
-		control.pan -= 5;
-		if (control.pan < -85) {
-			control.pan = -85;
+		gimbal.pan -= 5;
+		if (gimbal.pan < -85) {
+			gimbal.pan = -85;
 			return;
 		}
 		break;
 	case 'a': //LEFT
 	case 'A':
-		control.pan += 5;
-		if (control.pan > 85) {
-			control.pan = 85;
+		gimbal.pan += 5;
+		if (gimbal.pan > 85) {
+			gimbal.pan = 85;
 			return;
 		}
 		break;
@@ -408,10 +398,10 @@ void Viewer::processKeyPress(int keyCode) {
 
 	Message *message = Message::create();
 	if (message) {
-		message->putHeader(0, source.id, Message::HEADER_SIZE,
-				nextSequenceNumber(), 0, 0, 1, WH_AQLF_REQUEST);
-		message->appendData32(control.pan + 90);
-		message->appendData32(control.tilt + 90);
+		message->putHeader(0, peer.id, Message::HEADER_SIZE,
+				flow.nextSequenceNumber(), 0, 0, 1, WH_AQLF_REQUEST);
+		message->appendData32(gimbal.pan + 90);
+		message->appendData32(gimbal.tilt + 90);
 		message->setDestination(0); //Route via overlay network
 		sendMessage(message);
 	}
@@ -424,6 +414,13 @@ void Viewer::hideWindow() noexcept {
 		}
 	} catch (...) {
 	}
+}
+
+void Viewer::clear() noexcept {
+	memset(&peer, 0, sizeof(peer));
+	memset(&image, 0, sizeof(image));
+	memset(&gimbal, 0, sizeof(gimbal));
+	memset(&location, 0, sizeof(location));
 }
 
 } /* namespace wanhive */

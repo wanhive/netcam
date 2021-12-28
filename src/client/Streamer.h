@@ -72,6 +72,8 @@ private:
 		bool gps;
 		bool servo;
 	} ctx;
+
+	FlowControl flow; //Flow control
 };
 
 } /* namespace wanhive */
