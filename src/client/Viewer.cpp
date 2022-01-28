@@ -182,8 +182,9 @@ void Viewer::sendHeartbeat(unsigned long long id, unsigned int frames) noexcept 
 	Message *message = Message::create();
 	if (message) {
 		peer.sequence = flow.nextSequenceNumber();
-		message->putHeader(0, id, Message::HEADER_SIZE, peer.sequence, 0, 0, 0,
-				WH_AQLF_REQUEST);
+		MessageHeader header(0, id, Message::HEADER_SIZE, peer.sequence, 0, 0,
+				0, WH_AQLF_REQUEST);
+		message->putHeader(header);
 		message->appendData32(frames); //Request new frames
 		message->setDestination(0); //Route via overlay network
 		sendMessage(message);
@@ -398,8 +399,9 @@ void Viewer::processKeyPress(int keyCode) {
 
 	Message *message = Message::create();
 	if (message) {
-		message->putHeader(0, peer.id, Message::HEADER_SIZE,
+		MessageHeader header(0, peer.id, Message::HEADER_SIZE,
 				flow.nextSequenceNumber(), 0, 0, 1, WH_AQLF_REQUEST);
+		message->putHeader(header);
 		message->appendData32(gimbal.pan + 90);
 		message->appendData32(gimbal.tilt + 90);
 		message->setDestination(0); //Route via overlay network

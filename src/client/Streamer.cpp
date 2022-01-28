@@ -128,20 +128,21 @@ void Streamer::sendImage() noexcept {
 	/**
 	 * JPEG frames sent on session 1
 	 */
-	Message *message = Message::create();
-	message->putHeader(0, peer.id, Message::HEADER_SIZE, sequenceNo, 1, 0, 0,
-			WH_AQLF_REQUEST);
+	Message *message = Message::create(); //Frame metadata
+	MessageHeader header(0, peer.id, Message::HEADER_SIZE, sequenceNo, 1, 0, 0,
+			WH_AQLF_REQUEST); //Frame metadata context
+	message->putHeader(header);
 	message->appendData32(bytes);
 	message->appendData32(devices.camera->getWidth());
 	message->appendData32(devices.camera->getHeight());
 	message->setDestination(0); //Route via overlay network
-	sendMessage(message); //Frame metadata
+	sendMessage(message);
 
+	header.setContext( { 0, 1, WH_AQLF_REQUEST }); //Frame data context
 	for (; count != 0; --count) {
 		auto toSend = Twiddler::min(bytes, Message::PAYLOAD_SIZE);
 		message = Message::create();
-		message->putHeader(0, peer.id, Message::HEADER_SIZE, sequenceNo, 1, 0,
-				1, WH_AQLF_REQUEST);
+		message->putHeader(header);
 		message->appendBytes(data, toSend);
 		data += toSend;
 		bytes -= toSend;
