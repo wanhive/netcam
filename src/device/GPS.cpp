@@ -23,10 +23,8 @@
 #include "GPS.h"
 #include <math.h>
 
-#if GPSD_API_MAJOR_VERSION >= 7
-#define WH_GPS_READ(X, Y, Z) gps_read(X, Y, Z)
-#else
-#define WH_GPS_READ(X, Y, Z) gps_read(X)
+#if GPSD_API_MAJOR_VERSION < 10
+#error "Incompatible GPSD API version."
 #endif
 
 namespace wanhive {
@@ -45,7 +43,7 @@ bool GPS::read(GeoLocation &location) noexcept {
 	if (!connected && !connect()) {
 		perror(nullptr);
 		return false;
-	} else if ((nRead = WH_GPS_READ(&data, message, sizeof(message))) == -1) {
+	} else if ((nRead = gps_read(&data, message, sizeof(message))) == -1) {
 		perror(nullptr);
 		disconnect();
 		return false;
@@ -65,28 +63,16 @@ void GPS::reset() noexcept {
 
 void GPS::getData(GeoLocation &location) const noexcept {
 	const gps_fix_t &fix = data.fix;
-#if GPSD_API_MAJOR_VERSION >= 9
 	location.timestamp = fix.time.tv_sec + (fix.time.tv_nsec / 1000000000.0);
-#else
-		if (!isnan(fix.time)) {
-			location.timestamp = fix.time;
-		}
-#endif
 	if (!isnan(fix.latitude)) {
 		location.latitude = fix.latitude;
 	}
 	if (!isnan(fix.longitude)) {
 		location.longitude = fix.longitude;
 	}
-#if GPSD_API_MAJOR_VERSION >= 9
 	if (!isnan(fix.altMSL)) {
 		location.altitude = fix.altMSL;
 	}
-#else
-		if (!isnan(fix.altitude)) {
-			location.altitude = fix.altitude;
-		}
-#endif
 	if (!isnan(fix.speed)) {
 		location.speed = fix.speed;
 	}
@@ -100,7 +86,7 @@ void GPS::getData(GeoLocation &location) const noexcept {
 }
 
 bool GPS::hasData() noexcept {
-	return isConnected() && data.set && (data.status != STATUS_NO_FIX)
+	return isConnected() && data.set && (data.fix.status != STATUS_NO_FIX)
 			&& (data.fix.mode == MODE_2D || data.fix.mode == MODE_3D);
 }
 
