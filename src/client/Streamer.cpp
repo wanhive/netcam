@@ -96,7 +96,7 @@ void Streamer::maintain() noexcept {
 	}
 }
 
-void Streamer::processClockNotification(unsigned long long uid,
+void Streamer::processAlarm(unsigned long long uid,
 		unsigned long long ticks) noexcept {
 	try {
 		if (isConnected() && peer.id && peer.frames) {
@@ -129,8 +129,10 @@ void Streamer::sendImage() noexcept {
 	 * JPEG frames sent on session 1
 	 */
 	Message *message = Message::create(); //Frame metadata
-	MessageHeader header(0, peer.id, Message::HEADER_SIZE, sequenceNo, 1, 0, 0,
-			WH_AQLF_REQUEST); //Frame metadata context
+	MessageHeader header;
+	header.setAddress(0, peer.id);
+	header.setControl(Message::HEADER_SIZE, sequenceNo, 1);
+	header.setContext(0, 0, WH_AQLF_REQUEST); //Frame metadata context
 	message->putHeader(header);
 	message->appendData32(bytes);
 	message->appendData32(devices.camera->getWidth());
@@ -138,7 +140,7 @@ void Streamer::sendImage() noexcept {
 	message->setDestination(0); //Route via overlay network
 	sendMessage(message);
 
-	header.setContext( { 0, 1, WH_AQLF_REQUEST }); //Frame data context
+	header.setContext(0, 1, WH_AQLF_REQUEST); //Frame data context
 	for (; count != 0; --count) {
 		auto toSend = Twiddler::min(bytes, Message::PAYLOAD_SIZE);
 		message = Message::create();
@@ -168,7 +170,7 @@ int Streamer::handlePairingRequest(Message *message) noexcept {
 	 */
 	unsigned int expiration = 0;
 	unsigned int interval = 0;
-	getClockSettings(expiration, interval);
+	getAlarmSettings(expiration, interval);
 	if (interval) {
 		message->setData32(0, 1000 / interval);
 	} else {
@@ -191,7 +193,7 @@ int Streamer::handlePairingRequest(Message *message) noexcept {
 		location.mode = 0;
 	}
 	//-----------------------------------------------------------------
-	message->updateDestination(peer.id);
+	message->writeDestination(peer.id);
 	message->setDestination(0);
 	message->putStatus(WH_AQLF_ACCEPTED);
 	return 0;

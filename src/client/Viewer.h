@@ -26,18 +26,18 @@
 
 namespace wanhive {
 
-class Viewer: public ClientHub {
+class Viewer final: public ClientHub {
 public:
 	Viewer(unsigned long long uid, unsigned long long streamerId,
 			const char *path = nullptr) noexcept;
 	virtual ~Viewer();
 private:
-	void configure(void *arg) override final;
-	void cleanup() noexcept override final;
-	void route(Message *message) noexcept override final;
-	void maintain() noexcept override final;
-	void processClockNotification(unsigned long long uid,
-			unsigned long long ticks) noexcept override final;
+	void configure(void *arg) override;
+	void cleanup() noexcept override;
+	void route(Message *message) noexcept override;
+	void maintain() noexcept override;
+	void processAlarm(unsigned long long uid, unsigned long long ticks) noexcept
+			override;
 
 	//Send a heartbeat message, request <frames> frames from the source <id>
 	void sendHeartbeat(unsigned long long id, unsigned int frames) noexcept;

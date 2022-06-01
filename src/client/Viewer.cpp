@@ -154,7 +154,7 @@ void Viewer::maintain() noexcept {
 	}
 }
 
-void Viewer::processClockNotification(unsigned long long uid,
+void Viewer::processAlarm(unsigned long long uid,
 		unsigned long long ticks) noexcept {
 	if (!isConnected()) {
 		hideWindow();
@@ -164,7 +164,7 @@ void Viewer::processClockNotification(unsigned long long uid,
 	//-----------------------------------------------------------------
 	unsigned int expiration = 0;
 	unsigned int interval = 0;
-	getClockSettings(expiration, interval);
+	getAlarmSettings(expiration, interval);
 	if (interval) {
 		WH_LOG_DEBUG("Current frame rate: %f frames/s",
 				((double )image.frames * 1000) / interval);
@@ -182,8 +182,10 @@ void Viewer::sendHeartbeat(unsigned long long id, unsigned int frames) noexcept 
 	Message *message = Message::create();
 	if (message) {
 		peer.sequence = flow.nextSequenceNumber();
-		MessageHeader header(0, id, Message::HEADER_SIZE, peer.sequence, 0, 0,
-				0, WH_AQLF_REQUEST);
+		MessageHeader header;
+		header.setAddress(0, id);
+		header.setControl(Message::HEADER_SIZE, peer.sequence, 0);
+		header.setContext(0, 0, WH_AQLF_REQUEST);
 		message->putHeader(header);
 		message->appendData32(frames); //Request new frames
 		message->setDestination(0); //Route via overlay network
@@ -399,8 +401,10 @@ void Viewer::processKeyPress(int keyCode) {
 
 	Message *message = Message::create();
 	if (message) {
-		MessageHeader header(0, peer.id, Message::HEADER_SIZE,
-				flow.nextSequenceNumber(), 0, 0, 1, WH_AQLF_REQUEST);
+		MessageHeader header;
+		header.setAddress(0, peer.id);
+		header.setControl(Message::HEADER_SIZE, flow.nextSequenceNumber(), 0);
+		header.setContext(0, 1, WH_AQLF_REQUEST);
 		message->putHeader(header);
 		message->appendData32(gimbal.pan + 90);
 		message->appendData32(gimbal.tilt + 90);
