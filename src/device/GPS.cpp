@@ -21,7 +21,8 @@
  */
 
 #include "GPS.h"
-#include <math.h>
+#include <cmath>
+#include <cstring>
 
 #if GPSD_API_MAJOR_VERSION < 10
 #error "Incompatible GPSD API version."
@@ -41,10 +42,8 @@ bool GPS::read(GeoLocation &location) noexcept {
 	int nRead = 0;
 	message[0] = 0;
 	if (!connected && !connect()) {
-		perror(nullptr);
 		return false;
 	} else if ((nRead = gps_read(&data, message, sizeof(message))) == -1) {
-		perror(nullptr);
 		disconnect();
 		return false;
 	} else if (nRead == 0) {
@@ -62,24 +61,25 @@ void GPS::reset() noexcept {
 }
 
 void GPS::getData(GeoLocation &location) const noexcept {
-	const gps_fix_t &fix = data.fix;
+	memset(&location, 0, sizeof(location));
+	const auto &fix = data.fix;
 	location.timestamp = fix.time.tv_sec + (fix.time.tv_nsec / 1000000000.0);
-	if (!isnan(fix.latitude)) {
+	if (std::isfinite(fix.latitude)) {
 		location.latitude = fix.latitude;
 	}
-	if (!isnan(fix.longitude)) {
+	if (std::isfinite(fix.longitude)) {
 		location.longitude = fix.longitude;
 	}
-	if (!isnan(fix.altMSL)) {
+	if (std::isfinite(fix.altMSL)) {
 		location.altitude = fix.altMSL;
 	}
-	if (!isnan(fix.speed)) {
+	if (std::isfinite(fix.speed)) {
 		location.speed = fix.speed;
 	}
-	if (!isnan(fix.track)) {
+	if (std::isfinite(fix.track)) {
 		location.heading = fix.track;
 	}
-	if (!isnan(fix.climb)) {
+	if (std::isfinite(fix.climb)) {
 		location.climb = fix.climb;
 	}
 	location.mode = fix.mode;
@@ -96,7 +96,7 @@ bool GPS::isConnected() noexcept {
 
 bool GPS::connect() noexcept {
 	disconnect();
-	if (gps_open("localhost", DEFAULT_GPSD_PORT, &data) == -1) {
+	if (gps_open(GPSD_SHARED_MEMORY, nullptr, &data) == -1) {
 		return false;
 	} else {
 		gps_stream(&data, WATCH_ENABLE, nullptr);
