@@ -324,13 +324,13 @@ void Viewer::resetSink() {
 			}
 
 			if (!sink.fourcc || strlen(sink.fourcc) != 4) {
-				throw Exception(EX_INVALIDPARAM);
+				throw Exception(EX_PARAMETER);
 			}
 
 			char t[32];
 			memset(t, 0, sizeof(t));
 			if (!Timer::print(t, sizeof(t))) {
-				throw Exception(EX_INVALIDOPERATION);
+				throw Exception(EX_OPERATION);
 			}
 
 			memset(sink.fileName, 0, sizeof(sink.fileName));
@@ -342,14 +342,14 @@ void Viewer::resetSink() {
 					sink.writer.fourcc(sink.fourcc[0], sink.fourcc[1],
 							sink.fourcc[2], sink.fourcc[3]), image.frameRate,
 					cv::Size(image.width, image.height), true)) {
-				throw Exception(EX_INVALIDOPERATION);
+				throw Exception(EX_OPERATION);
 			}
 			sink.reset = false;
 		}
 	} catch (BaseException &e) {
 		throw;
 	} catch (...) {
-		throw Exception(EX_INVALIDOPERATION);
+		throw Exception(EX_OPERATION);
 	}
 }
 

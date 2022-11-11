@@ -165,7 +165,7 @@ unsigned short I2C::process(unsigned char command, unsigned short value) {
 }
 
 void I2C::open(const char *path, unsigned int device) {
-	WH_STATIC_ASSERT(((sizeof(unsigned int) == 4) && (CHAR_BIT == 8)),
+	static_assert(((sizeof(unsigned int) == 4) && (CHAR_BIT == 8)),
 			"Unsupported platform");
 	try {
 		close(); //Just in case

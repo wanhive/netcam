@@ -56,7 +56,7 @@ void Streamer::configure(void *arg) {
 		throw;
 	} catch (...) {
 		WH_LOG_EXCEPTION_U();
-		throw Exception(EX_INVALIDOPERATION);
+		throw Exception(EX_OPERATION);
 	}
 }
 
@@ -274,7 +274,7 @@ void Streamer::initDevices() {
 		throw;
 	} catch (...) {
 		WH_LOG_EXCEPTION_U();
-		throw Exception(EX_ALLOCFAILED);
+		throw Exception(EX_MEMORY);
 	}
 }
 
