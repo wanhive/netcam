@@ -98,7 +98,7 @@ void ClientManager::printHelp(FILE *stream) noexcept {
 			"If none is supplied via the command line then the program will\n"
 			"try to read '%s' from the 'current working directory',\n"
 			"the 'executable directory', %s, or\n"
-			"%s in that order.\n\n", WH_PRODUCT_NAME, Identity::CONF_FILE,
+			"%s in that order.\n\n", WH_PRODUCT_NAME, Identity::CONF_FILE_NAME,
 			Identity::CONF_PATH, Identity::CONF_SYSTEM_PATH);
 
 	fprintf(stream, "\nwebsite: %s   email: %s\n\n",
