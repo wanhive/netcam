@@ -113,7 +113,7 @@ int ClientManager::parseOptions(int argc, char *const*argv) noexcept {
 	configPath = nullptr;
 	hub = nullptr;
 	//-----------------------------------------------------------------
-	programName = strrchr(argv[0], Storage::DIR_SEPARATOR);
+	programName = strrchr(argv[0], Storage::PATH_SEPARATOR);
 	programName = programName ? (programName + 1) : argv[0];
 	//-----------------------------------------------------------------
 	const char *shortOptions = "c:hmn:t:";
