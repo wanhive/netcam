@@ -120,8 +120,10 @@ void Camera::open() {
 		if (device.vcap.isOpened()) {
 			return;
 		} else if (device.name && device.vcap.open(device.name)) {
+			device.vcap.set(cv::CAP_PROP_BUFFERSIZE, 3);
 			setResolution(device.width, device.height);
 		} else if (!device.name && device.vcap.open(device.index)) {
+			device.vcap.set(cv::CAP_PROP_BUFFERSIZE, 3);
 			setResolution(device.width, device.height);
 		} else {
 			throw Exception(EX_RESOURCE);
